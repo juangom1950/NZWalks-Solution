@@ -36,7 +36,7 @@ namespace NZWalks.API.Repositories
 
 
             // Add Image to the Images table
-            await dbContext.Images.AddAsync(image);
+            //await dbContext.Images.AddAsync(image);
             await dbContext.SaveChangesAsync();
 
             return image;

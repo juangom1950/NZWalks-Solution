@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
-namespace NZWalks.API.Migrations.NZWalksAuthDb
+namespace NZWalks.API.Migrations
 {
     /// <inheritdoc />
-    public partial class CreatingAuthDatabase : Migration
+    public partial class InitialMigragion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,6 +48,32 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Difficulties",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Difficulties", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Regions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RegionImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Regions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -158,13 +182,33 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[,]
+            migrationBuilder.CreateTable(
+                name: "Walks",
+                columns: table => new
                 {
-                    { "a71a55d6-99d7-4123-b4e0-1218ecb90e3e", "a71a55d6-99d7-4123-b4e0-1218ecb90e3e", "Reader", "READER" },
-                    { "c309fa92-2123-47be-b397-a1c77adb502c", "c309fa92-2123-47be-b397-a1c77adb502c", "Writer", "WRITER" }
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LengthInKm = table.Column<double>(type: "float", nullable: false),
+                    WalkImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DifficultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Walks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Walks_Difficulties_DifficultyId",
+                        column: x => x.DifficultyId,
+                        principalTable: "Difficulties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Walks_Regions_RegionId",
+                        column: x => x.RegionId,
+                        principalTable: "Regions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -205,6 +249,16 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Walks_DifficultyId",
+                table: "Walks",
+                column: "DifficultyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Walks_RegionId",
+                table: "Walks",
+                column: "RegionId");
         }
 
         /// <inheritdoc />
@@ -226,10 +280,19 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Walks");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Difficulties");
+
+            migrationBuilder.DropTable(
+                name: "Regions");
         }
     }
 }

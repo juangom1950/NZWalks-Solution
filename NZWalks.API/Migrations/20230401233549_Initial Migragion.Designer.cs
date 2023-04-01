@@ -9,11 +9,11 @@ using NZWalks.API.Data;
 
 #nullable disable
 
-namespace NZWalks.API.Migrations.NZWalksAuthDb
+namespace NZWalks.API.Migrations
 {
-    [DbContext(typeof(NZWalksAuthDbContext))]
-    [Migration("20230321213851_Creating Auth Database")]
-    partial class CreatingAuthDatabase
+    [DbContext(typeof(NZWalksDbContext))]
+    [Migration("20230401233549_Initial Migragion")]
+    partial class InitialMigragion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,22 +50,6 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "a71a55d6-99d7-4123-b4e0-1218ecb90e3e",
-                            ConcurrencyStamp = "a71a55d6-99d7-4123-b4e0-1218ecb90e3e",
-                            Name = "Reader",
-                            NormalizedName = "READER"
-                        },
-                        new
-                        {
-                            Id = "c309fa92-2123-47be-b397-a1c77adb502c",
-                            ConcurrencyStamp = "c309fa92-2123-47be-b397-a1c77adb502c",
-                            Name = "Writer",
-                            NormalizedName = "WRITER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -239,6 +223,78 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("NZWalks.API.Models.Domain.Difficulty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Difficulties");
+                });
+
+            modelBuilder.Entity("NZWalks.API.Models.Domain.Region", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegionImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Regions");
+                });
+
+            modelBuilder.Entity("NZWalks.API.Models.Domain.Walk", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DifficultyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("LengthInKm")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RegionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("WalkImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DifficultyId");
+
+                    b.HasIndex("RegionId");
+
+                    b.ToTable("Walks");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -288,6 +344,25 @@ namespace NZWalks.API.Migrations.NZWalksAuthDb
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("NZWalks.API.Models.Domain.Walk", b =>
+                {
+                    b.HasOne("NZWalks.API.Models.Domain.Difficulty", "Difficulty")
+                        .WithMany()
+                        .HasForeignKey("DifficultyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NZWalks.API.Models.Domain.Region", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Difficulty");
+
+                    b.Navigation("Region");
                 });
 #pragma warning restore 612, 618
         }
